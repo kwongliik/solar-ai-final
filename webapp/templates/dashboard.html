@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power & Energy Forecast Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Leaflet (OpenStreetMap) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark navbar-custom">
+    <h1 class="navbar-brand mb-0">☀️ Power & Energy Forecast Dashboard For Solar Panel</h1>
+</nav>
+
+<!-- Location Search Section -->
+    <div class="search" style="text-align: center; margin-top: 20px;">
+      <h3>🔍 Search for a Place</h3>
+      <input type="text" id="placeInput" placeholder="Enter city or place name" style="width: 300px; height: 40px; font-size: 18px; padding: 5px 10px; border-radius: 8px; border: 1px solid #ccc;"
+  />
+      <button onclick="searchPlace()" style="height: 45px; font-size: 18px; padding: 0 20px; border-radius: 8px; border: none; background-color: #007bff; color: white; cursor: pointer;"
+  >Search</button>
+      <p id="searchResult" style="font-size: 16px; margin-top: 10px;"></p>
+    </div>
+
+    <!-- Static GPS Location Section -->
+    <div class="location">
+      <h2>📍 Solar Tracker Location</h2>
+      <p id="lat">Latitude: 2.3098</p>
+      <p id="lon">Longitude: 111.8304</p>
+      <div id="map"></div>
+    </div>
+
+    <!-- Weather Forecast Section -->
+    <div class="weather">
+      <h2>🌤️ Current Weather</h2>
+      <div id="weatherInfo">
+        <p>Loading weather...</p>
+      </div>
+    </div>
+
+    <!-- Clocks Section -->
+    <div class="timestamps">
+      <h2>System Time: <span id="systemTime"></span></h2>
+      <h2>Last Data Timestamp: <span id="dataTimestamp"></span></h2>
+    </div>
+
+<div class="container mt-4">
+
+    <h2>Power Forecast (Next 48 Hours)</h2>
+    <canvas id="powerChart" height="100"></canvas>
+
+    <h2>Predicted Daily Energy Yield</h2>
+    <canvas id="yieldChart" height="100"></canvas>
+
+    <h2>Weather Factors Affecting Daily Energy Yield</h2>
+    <canvas id="weatherChart" height="100"></canvas>
+
+</div>
+
+<script>
+const powerData = {{ power_data | tojson }};
+const dailyData = {{ daily_data | tojson }};
+const weatherData = {{ weather_data | tojson }};
+</script>
+
+<!-- Leaflet (OpenStreetMap) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  let currentLat = {{ latitude | tojson }};
+  let currentLon = {{ longitude | tojson }};
+
+  // Initialize map
+  const map = L.map('map').setView([currentLat, currentLon], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+  let marker = L.marker([currentLat, currentLon]).addTo(map)
+    .bindPopup(`Solar Tracker<br>Lat: ${currentLat}<br>Lon: ${currentLon}`)
+    .openPopup();
+
+  // --- Load weather for given lat/lon ---
+  async function loadWeather(lat, lon) {
+    try {
+      const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`);
+      const data = await res.json();
+
+      if (data.error) {
+        document.getElementById("weatherInfo").innerHTML = `<p>Error: ${data.error}</p>`;
+        return;
+      }
+
+      const iconUrl = `https://openweathermap.org/img/wn/${data.icon}@2x.png`;
+      document.getElementById("weatherInfo").innerHTML = `
+        <p><strong>Location:</strong> ${data.location}</p>
+        <p><strong>Temperature:</strong> ${data.temperature} °C</p>
+        <p><strong>Humidity:</strong> ${data.humidity}%</p>
+        <p><strong>Condition:</strong> ${data.description}</p>
+        <img src="${iconUrl}" alt="icon">
+      `;
+    } catch (err) {
+      document.getElementById("weatherInfo").innerHTML = `<p>Failed to load weather.</p>`;
+    }
+  }
+
+  // --- Search and update map/weather ---
+  async function searchPlace() {
+    const place = document.getElementById("placeInput").value.trim();
+    const resultBox = document.getElementById("searchResult");
+    if (!place) {
+      resultBox.textContent = "Please enter a place name.";
+      return;
+    }
+
+    resultBox.textContent = "Searching...";
+
+    try {
+      const res = await fetch(`/api/geocode?place=${encodeURIComponent(place)}`);
+      const data = await res.json();
+
+      if (data.error) {
+        resultBox.textContent = data.error;
+        return;
+      }
+
+      currentLat = data.lat;
+      currentLon = data.lon;
+      resultBox.textContent = `📍 ${data.name}, ${data.country} (${data.lat.toFixed(3)}, ${data.lon.toFixed(3)})`;
+      document.getElementById("lat").textContent = `Latitude: ${currentLat}`;
+      document.getElementById("lon").textContent = `Longitude: ${currentLon}`;
+
+      // Update map
+      map.setView([currentLat, currentLon], 13);
+      marker.setLatLng([currentLat, currentLon])
+        .setPopupContent(`${data.name}<br>Lat: ${data.lat}<br>Lon: ${data.lon}`)
+        .openPopup();
+
+      // Fetch weather for new location
+      loadWeather(currentLat, currentLon);
+    } catch (err) {
+      resultBox.textContent = "Failed to fetch location.";
+    }
+  }
+
+// Load default weather
+loadWeather(currentLat, currentLon);
+</script>
+
+<!-- External JS file -->
+<script src="{{ url_for('static', filename='dashboard.js') }}?v=6"></script>
+
+</body>
+</html>

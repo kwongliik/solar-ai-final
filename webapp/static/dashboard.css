@@ -1,0 +1,32 @@
+body {
+    background-color: #111;
+    color: #f1f1f1;
+}
+h2 {
+    margin-top: 40px;
+}
+canvas {
+    background: #222;
+    border-radius: 8px;
+    padding: 10px;
+}
+.navbar {
+    background: #1a1a1a;
+}
+
+#map {
+      height: 300px;
+      width: 100%;
+      margin-top: 10px;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+}
+
+.navbar-custom {
+    padding: 20px 40px;   /* Top/Bottom + Left/Right */
+}
+
+.navbar-custom .navbar-brand {
+    font-size: 2.5rem;    /* Adjust to any size you like */
+    font-weight: bold;
+}
