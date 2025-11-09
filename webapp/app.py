@@ -10,7 +10,7 @@ app = Flask(__name__)
 DB_PATH = os.path.expanduser("~/Documents/solar-ai/data/solar_forecast.db")
 
 # --- CONFIG ---
-WEATHER_API_KEY = "f10e207b3059effa1f04deccd43e5e48"  # replace with your actual key
+WEATHER_API_KEY = "************************************"  # replace with your actual key
 WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
 
 def query_db(query, args=()):
