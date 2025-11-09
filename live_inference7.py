@@ -144,7 +144,7 @@ while True:
     
     latest_ts_str = str(latest_df['timestamp'].iloc[0])
 
-    irradiance, temp_air = get_weather_data(lat, lon, "f10e207b3059effa1f04deccd43e5e48")
+    irradiance, temp_air = get_weather_data(lat, lon, "************************************")
     print(f"Weather: irradiance={irradiance:.1f} W/m², temp={temp_air:.1f}°C")
     latest_df["irradiance"] = irradiance
     latest_df["temp_air"] = temp_air
