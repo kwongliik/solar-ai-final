@@ -13,7 +13,7 @@ import sqlite3
 # CONFIGURATION
 # -----------------------------
 LAT, LON = 2.3098, 111.8304
-API_KEY = "f10e207b3059effa1f04deccd43e5e48"
+API_KEY = "***********************************"
 MODEL_PATH = os.path.expanduser("~/Documents/solar-ai/models/solar_correction_model.pkl")
 TIMEZONE = pytz.timezone("Asia/Kuala_Lumpur")
 DB_PATH = os.path.expanduser("~/Documents/solar-ai/data/solar_forecast.db")
