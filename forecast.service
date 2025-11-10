@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Solar Power Forecast Script Daily
+After=network.target
+
+[Service]
+Type=oneshot
+User=pi
+ExecStart=/usr/bin/python3 /home/pi/Documents/solar-ai/forecast_hourly.py
+WorkingDirectory=/home/pi/Documents/solar-ai/
+
+[Install]
+WantedBy=multi-user.target
