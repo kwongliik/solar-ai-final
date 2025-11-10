@@ -1,0 +1,12 @@
+[Unit]
+Description=Solar Forecast Flask Dashboard
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/pi/Documents/solar-ai/webapp
+ExecStart=/usr/bin/python3 /home/pi/Documents/solar-ai/webapp/app.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
