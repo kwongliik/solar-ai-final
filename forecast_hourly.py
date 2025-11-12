@@ -233,13 +233,13 @@ def get_daily_energy_forecast(model, lat, lon, api_key):
         forecasts = []
 
         panel_power_W = 5
-        #panel_area = 0.016485
+        panel_area = 0.016485
         panel_efficiency = 0.17
         temp_coeff = -0.0045  
         tracking_gain = 1.25
 
         # ✅ Calculate panel area from power rating (physics-based)
-        panel_area = panel_power_W / (1000 * panel_efficiency)
+        #panel_area = panel_power_W / (1000 * panel_efficiency)
 
         for d in data["daily"]:
             date = datetime.fromtimestamp(d["dt"], tz=TIMEZONE).date()
